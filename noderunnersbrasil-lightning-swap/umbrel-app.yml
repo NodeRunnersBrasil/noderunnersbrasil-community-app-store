@@ -1,0 +1,23 @@
+manifestVersion: 1
+id: noderunnersbrasil-lightning-swap
+name: Lightning Swap
+tagline: Simple, bitcoin swap.
+icon: https://i.imgur.com/bhN7ebY.png
+category: Finance
+version: 1.0.0
+description: >- 
+  Lightning swap is a simple off-chain to on-chain swap service.
+developer: Gray Finance
+website: https://github.com/grayfinance
+submitter: Alef
+submission: https://github.com/leffw
+repo: https://github.com/GrayFinance/lightning-swap
+support: https://github.com/GrayFinance/lightning-swap/issues
+gallery:
+  - https://i.imgur.com/2p9gHFw.png
+  - https://i.imgur.com/S4jVx5S.png
+  - https://i.imgur.com/2V0QvsE.png
+dependencies:
+  - lnbits
+path: ""
+port: 5173

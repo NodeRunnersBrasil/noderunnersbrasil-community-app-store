@@ -1,0 +1,24 @@
+:root {
+    font-family: Inter, Avenir, Helvetica, Arial, sans-serif;
+    font-size: 16px;
+    line-height: 24px;
+    font-weight: 400;
+    font-synthesis: none;
+    color: white;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    -webkit-text-size-adjust: 100%;
+    --background-color: #4a4a4a;
+    --box-color: #141414;
+    --shadow-color: #2E3336;
+    --button-primary-color: #048146;
+    --button-second-color: #2E3336;
+}
+  
+body {
+    margin: 0;
+    background-color: var(--background-color);
+    place-items: center;
+}
+  

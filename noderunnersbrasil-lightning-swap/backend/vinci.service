@@ -1,0 +1,14 @@
+[Unit]
+Description=Vinci Swap
+
+[Service]
+User=vinci
+WorkingDirectory=/home/vinci/vinci
+ExecStart=ENV_PATH=/home/vinci/vinci/.env /home/vinci/vinci/venv/python3 /home/vinci/vinci/__main__.py
+SuccessExitStatus=143
+TimeoutStopSec=10
+Restart=always
+RestartSec=30
+
+[Install]
+WantedBy=multi-user.target
