@@ -1,0 +1,58 @@
+version: "3.7"
+
+services:
+  redis:  
+    image: redis:latest
+    command: 
+      - redis-server
+      - redis.conf
+      - --requirepass 
+      - ${REDIS_PASS}
+      - --appendonly yes
+    volumes:
+      - ${APP_DATA_DIR}/data/redis:/data
+
+  frontend:
+    image: lightning-swap-frontend:latest
+    build: ${APP_DATA_DIR}/frontend
+    container_name: lightning-swap-frontend
+    ports:
+      - 5173:5173
+    environment:
+      - VITE_VINCENT_BACKEND=${VITE_VINCENT_BACKEND}
+      - VITE_TITLE=${VITE_TITLE}
+    restart: on-failure
+    stop_grace_period: 1m
+
+  backend:
+    image: lightning-swap-backend:latest
+    build: ${APP_DATA_DIR}/backend
+    container_name: lightning-swap-backend
+    ports:
+      - 1536:1536
+    environment:
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASS=${REDIS_PASS}
+      
+      - LND_HOST=${LND_HOST}
+      - LND_MACAROON=${LND_MACAROON}
+      
+      - SWAP_SERVICE_FEERATE=${SWAP_SERVICE_FEERATE}
+      - SWAP_MAX_AMOUNT=${SWAP_MAX_AMOUNT}
+      - SWAP_MIN_AMOUNT=${SWAP_MIN_AMOUNT}
+
+      - LNBITS_HOST=${LNBITS_HOST}
+      - LNBITS_WEBHOOK_URL=${LNBITS_WEBHOOK_URL}
+      - LNBITS_MAIN_WALLET_ADMIN_KEY=${LNBITS_MAIN_WALLET_ADMIN_KEY}
+      - LNBITS_MAIN_WALLET_INVOICE_KEY=${LNBITS_MAIN_WALLET_INVOICE_KEY}
+
+      - LNBITS_SPLIT_WALLET_ADMIN_KEY=${LNBITS_SPLIT_WALLET_ADMIN_KEY}
+      - LNBITS_SPLIT_WALLET_INVOICE_KEY=${LNBITS_SPLIT_WALLET_INVOICE_KEY}
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    volumes:
+      - ${APP_DATA_DIR}/data/backend/database.db:/root/vinci/data/database.db
+      - ${APP_DATA_DIR}/backend:/app
+    restart: on-failure
+    stop_grace_period: 1m

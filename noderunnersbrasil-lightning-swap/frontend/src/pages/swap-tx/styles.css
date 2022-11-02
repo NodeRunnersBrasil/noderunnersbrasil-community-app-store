@@ -1,0 +1,29 @@
+
+.button-go-back {
+    width: 50%;
+    height: 50px;
+    border-radius: 10px;
+    border: 0;
+    cursor: pointer;
+}
+
+.try-to-send-bitcoin-again {
+    width: 65%;
+    height: 50px;
+    border-radius: 10px;
+    border: 0;
+    background-color: #d68120;   
+    color: white; 
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.try-to-send-bitcoin-again:disabled {
+    background-color: var(--button-second-color);
+}
+
+@media only screen and (max-width: 768px) {
+    .button-go-back {
+        width: 65%;
+    }
+}

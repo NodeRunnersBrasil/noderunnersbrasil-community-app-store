@@ -1,0 +1,147 @@
+.container {
+  background-color: var(--box-color);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: absolute;
+  width: 550px;
+  height: 550px;
+  margin: 0 auto;
+  justify-content: center;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  align-items: center;
+  margin: -25px 0 0 -25px;
+  border-radius: 1rem;
+  padding-top: 5%;
+  box-shadow: var(--shadow-color) 0px 54px 55px, var(--shadow-color) 0px -12px 30px, var(--shadow-color) 0px 4px 6px, var(--shadow-color) 0px 12px 13px, var(--shadow-color) 0px -3px 5px;
+}
+
+.box {
+  width: 90%;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  margin-top: 3%;
+}
+
+.input {
+  width: 65%;
+  height: 50px;
+  border-radius: 15px;
+  padding-left: 25px;
+  border-color: none;
+  border-width: 0;
+}
+
+.input:focus {
+  outline: none;
+}
+
+input[type="number"]::-webkit-outer-spin-button,
+input[type="number"]::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+.title {
+  font-weight: bold;  
+}
+
+.label {
+  display: flex;
+  flex-direction: row;
+  width: 25px;
+  margin-right: 60%;
+  font-size: 14px;
+  font-weight: bold;
+}
+
+.feerate {
+  width: 100%;
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-direction: column;
+  margin-top: 5%;
+  width: 65%;
+}
+
+.range {
+  width: 100%;
+}
+
+.logo {
+  width: 45px;
+  height: 45px;
+  color: #d68120;
+}
+
+.continue {
+  width: 65%;
+  height: 50px;
+  border-radius: 10px;
+  border: 0;
+  background-color: var(--button-primary-color);
+  font-weight: bold;
+  font-size: 18px;
+  color: white;
+  margin-top: 5%;
+  cursor: pointer;
+}
+
+.label-total-fees {
+  font-size: 14;
+  align-self: flex-end;
+  color: gray; 
+}
+
+@media only screen and (max-height: 600px)  {
+  .container {
+    margin-top: 1%;
+    height: 100%;
+    width: 100%;
+    padding-top: 2.5%;
+  }
+
+  .continue {
+    margin-top: 0;
+  }
+}
+
+@media only screen and (max-width: 768px) {
+  :root {
+    margin: 0 auto;
+    background-color: var(--box-color);
+  }
+
+  .container {
+    height: 100%;
+    width: 100%;
+    box-shadow: none;
+  }
+
+  .box {
+    width: 100%;
+  }
+
+  .input {
+    width: 60%;
+  }
+  
+  .label-total-fees {
+    font-size: 12px;
+  }
+  
+  .continue {
+    width: 65%;
+    height: 50px;
+    margin-top: 0;
+  }
+}
+
+.continue:disabled {
+  background-color: var(--button-second-color);
+}
