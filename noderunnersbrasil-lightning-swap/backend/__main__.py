@@ -27,7 +27,8 @@ except:
     sys.exit(0)
 
 try:
-    requests.get(LNBITS_HOST)
+    get_wallet = lnbits.get_wallet()
+    print(dumps(get_wallet, indent=3))
 except:
     logging.critical("Lnbits service unavailable.")
     logging.critical("Exit")
