@@ -1,6 +1,12 @@
 version: "3.7"
 
 services:
+  app_proxy:
+    environment:
+      APP_HOST: ${APP_LN_SWAP_FRONTEND_IP}
+      APP_PORT: 5173
+      PROXY_AUTH_ADD: "false"
+
   redis:  
     image: redis:latest
     command: 
@@ -16,14 +22,16 @@ services:
     image: lightning-swap-frontend:latest
     build: ${APP_DATA_DIR}/frontend
     container_name: lightning-swap-frontend
-    ports:
-      - 5173:5173
     environment:
-      - VITE_VINCENT_BACKEND=${VITE_VINCENT_BACKEND}
-      - VITE_TITLE=${VITE_TITLE}
+      - VITE_TITLE=LN Swap
+    networks:
+      default:
+        ipv4_address: $APP_LN_SWAP_FRONTEND_IP
     restart: on-failure
     stop_grace_period: 1m
-
+    depends_on:
+      - backend
+    
   backend:
     image: lightning-swap-backend:latest
     build: ${APP_DATA_DIR}/backend
@@ -49,10 +57,29 @@ services:
 
       - LNBITS_SPLIT_WALLET_ADMIN_KEY=${LNBITS_SPLIT_WALLET_ADMIN_KEY}
       - LNBITS_SPLIT_WALLET_INVOICE_KEY=${LNBITS_SPLIT_WALLET_INVOICE_KEY}
+    networks:
+      default:
+        ipv4_address: $APP_LN_SWAP_BACKEND_IP
     extra_hosts:
       - "host.docker.internal:host-gateway"
     volumes:
       - ${APP_DATA_DIR}/data/backend/database.db:/root/vinci/data/database.db
       - ${APP_DATA_DIR}/backend:/app
+      - ${APP_DATA_DIR}/.env:/root/vinci/.env
     restart: on-failure
     stop_grace_period: 1m
+    depends_on:
+      - redis
+    
+  tor:
+    image: getumbrel/tor:0.4.7.8@sha256:2ace83f22501f58857fa9b403009f595137fa2e7986c4fda79d82a8119072b6a
+    user: "1000:1000"
+    restart: on-failure
+    volumes:
+      - ${APP_DATA_DIR}/torrc:/etc/tor/torrc:ro
+      - ${TOR_DATA_DIR}:/data
+    environment:
+      HOME: "/tmp"
+    depends_on:
+      - backend
+      - frontend
