@@ -5,6 +5,5 @@ COPY package-lock.json /app
 COPY . /app
 RUN npm i
 EXPOSE 5173
-EXPOSE 4173
 RUN npm run build
 CMD [ "npm", "run", "preview" ]

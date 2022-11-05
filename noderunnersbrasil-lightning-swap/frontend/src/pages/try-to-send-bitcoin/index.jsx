@@ -21,7 +21,8 @@ if ((window.location.href.includes(".onion")) && (import.meta.env.VITE_VINCENT_B
 function TryToSendBitcoin() {
     const { txid } = useParams();
 
-    const [ disableButton, setDisableButton ] = useState(false)
+    const [ explorerUrl, setExplorerURL ] = useState("https://blockstream.info/tx/");
+    const [ disableButton, setDisableButton ] = useState(false);
     const [ address, setAddress ] = useState("");
     const [ newTxid, setNewTxid ] = useState("")
     const [ amount, setAmount ] = useState(0);
@@ -33,6 +34,12 @@ function TryToSendBitcoin() {
     const navigate = useNavigate();
     const vincent = new Vincent(VITE_VINCENT_BACKEND);
 
+    useEffect(() => {
+        if (window.location.href.includes(".onion")) {
+            setExplorerURL("http://explorerzydxu5ecjrkwceayqybizmpjjznk5izmitf2modhcusuqlid.onion/tx/")
+        }    
+    }, [])
+    
     useEffect(() => {
         (txid) && vincent.get_lookup(txid).then((r) => {
             const data = r.data;
@@ -131,9 +138,9 @@ function TryToSendBitcoin() {
                         color: "white"
                     }} 
                     target="_blank"
-                    href={`https://mempool.space/tx/${tx.to.txid}`}
+                    href={`${explorerUrl}${tx.to.txid}`}
                 > 
-                    <b>TX:</b> <i>{tx.to.txid}</i>
+                    <i>{tx.to.txid}</i>
                 </a>
                 <button 
                     class="button-go-back" 

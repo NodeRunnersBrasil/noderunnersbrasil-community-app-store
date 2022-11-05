@@ -16,4 +16,4 @@ nano .env
 ```bash
 bash ./scripts/start.sh
 ```
-<b>Now access:</b> http://localhost:4173
+<b>Now access:</b> http://localhost:5173

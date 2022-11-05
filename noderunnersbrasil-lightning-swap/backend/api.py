@@ -5,7 +5,7 @@ from services.redis import redis
 from database import database
 
 from fastapi import FastAPI, HTTPException, Body
-from configs import INVOICE_EXPIRE, LNBITS_HOST, LNBITS_SPLIT_WALLET_ADMIN_KEY, LNBITS_SPLIT_WALLET_INVOICE_KEY
+from configs import INVOICE_EXPIRE, MIRRORS_CLEAR_URL, MIRRORS_TOR_URL
 from configs import PATH, SWAP_MAX_AMOUNT, SWAP_MIN_AMOUNT, SWAP_SERVICE_FEERATE
 from configs import API_HOST, API_PORT
 from helpers import percentage, timestamp
@@ -53,6 +53,10 @@ async def get_info():
             "network": fee_network,
             "service": SWAP_SERVICE_FEERATE
         },
+        "mirrors": {
+            "clear": MIRRORS_CLEAR_URL,
+            "tor": MIRRORS_TOR_URL
+        },
         "available": available
     }
 
@@ -98,16 +102,6 @@ def lnbits_webhook(data: dict = Body(...)):
 
         logging.info(f"Saving the data to a persistent {PATH}/data/database.db.")
         database.insert(tx)
-        
-        # Distribute profits to stakeholders
-        # configured in Split Wallet.        
-        earned_fees = tx["fees"]["service"]
-        logging.info(f"Sending {earned_fees} fees sats to the stackholders.")
-
-        if (LNBITS_SPLIT_WALLET_ADMIN_KEY) and (LNBITS_SPLIT_WALLET_INVOICE_KEY):
-            lnbits_split_fees = Lnbits(admin_key=LNBITS_SPLIT_WALLET_ADMIN_KEY, invoice_key=LNBITS_SPLIT_WALLET_INVOICE_KEY, url=LNBITS_HOST)
-            lnbits_split_fees_invoice = lnbits_split_fees.create_invoice(earned_fees)["payment_request"]
-            lnbits.pay_invoice(lnbits_split_fees_invoice)
     else:
         logging.critical("Could not send transaction possible lack of liquidity.")
         
@@ -150,17 +144,6 @@ def reedem(data: ReedemSchema):
         tx["updated_at"] = timestamp()
         
         database.update(tx, (Query().id == txid))
-
-        # Distribute profits to stakeholders
-        # configured in Split Wallet.        
-        earned_fees = tx["fees"]["service"]
-        logging.info(f"Sending {earned_fees} fees sats to the stackholders.")
-
-        if (LNBITS_SPLIT_WALLET_ADMIN_KEY) and (LNBITS_SPLIT_WALLET_INVOICE_KEY):
-            lnbits_split_fees = Lnbits(admin_key=LNBITS_SPLIT_WALLET_ADMIN_KEY, invoice_key=LNBITS_SPLIT_WALLET_INVOICE_KEY, url=LNBITS_HOST)
-            lnbits_split_fees_invoice = lnbits_split_fees.create_invoice(earned_fees)["payment_request"]
-            lnbits.pay_invoice(lnbits_split_fees_invoice)
-        
         return {"txid": send_coins["txid"]}
     else:
         database.update({"status": "reedem"}, (Query().id == txid))
