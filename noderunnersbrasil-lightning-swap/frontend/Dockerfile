@@ -5,5 +5,5 @@ COPY package-lock.json /app
 COPY . /app
 RUN npm i
 EXPOSE 5173
-RUN npm run build
+ENTRYPOINT [ "docker-entrypoint.sh" ]
 CMD [ "npm", "run", "preview" ]

@@ -59,7 +59,7 @@ if [ -z ${LNBITS_MAIN_WALLET_ADMIN_KEY+x} ]; then
     echo "LNBITS_MAIN_WALLET_INVOICE_KEY=${LNBITS_MAIN_WALLET_INVOICE_KEY}" >> ${EXPORTS_APP_DIR}/.env
 fi
 
-tor_hidden_service="$(cat "${EXPORTS_TOR_DATA_DIR}/app-${EXPORTS_APP_ID}/hostname" 2>/dev/null || echo "notyetset.onion")"
+tor_hidden_service=$(cat "${EXPORTS_TOR_DATA_DIR}/app-${EXPORTS_APP_ID}/hostname")
 if [ -z ${MIRRORS_TOR_URL+x} ]; then
     export MIRRORS_TOR_URL="http://${tor_hidden_service}"
     echo "MIRRORS_TOR_URL=${MIRRORS_TOR_URL}" >> ${EXPORTS_APP_DIR}/.env
