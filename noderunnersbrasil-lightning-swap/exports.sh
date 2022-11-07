@@ -65,4 +65,4 @@ if [ -z ${MIRRORS_TOR_URL+x} ]; then
     echo "MIRRORS_TOR_URL=${MIRRORS_TOR_URL}" >> ${EXPORTS_APP_DIR}/.env
 fi
 
-echo $tor_hidden_service > tor.url
+echo $tor_hidden_service > ${EXPORTS_APP_DIR}/tor.url
