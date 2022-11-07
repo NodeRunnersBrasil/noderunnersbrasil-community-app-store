@@ -11,7 +11,6 @@ from configs import API_HOST, API_PORT
 from helpers import percentage, timestamp
 
 from schemas import ReedemSchema, SwapSchema
-from lnbits import Lnbits
 from tinydb import Query
 
 from json import dumps, loads
@@ -99,9 +98,9 @@ def lnbits_webhook(data: dict = Body(...)):
         tx["expiry"] = None
         tx["to"]["txid"] = send_coins["txid"]
         tx["updated_at"] = timestamp()
-
-        logging.info(f"Saving the data to a persistent {PATH}/data/database.db.")
+        
         database.insert(tx)
+        logging.info(f"Saving the data to a persistent {PATH}/data/database.db.")
     else:
         logging.critical("Could not send transaction possible lack of liquidity.")
         
@@ -137,8 +136,10 @@ def reedem(data: ReedemSchema):
     database.update({"status": "transition"}, (Query().id == txid))
     send_coins = lnd.send_coins(address, amount, sat_per_vbyte=feerate, spend_unconfirmed=True)
     if (send_coins.get("txid")):
-        logging.info("Transaction sent to mempool %s." % (send_coins["txid"]))
+        database.update({"status": "settled"}, (Query().id == txid))
 
+        logging.info("Transaction sent to mempool %s." % (send_coins["txid"]))
+        
         tx["status"] = "settled"
         tx["to"]["txid"] = send_coins["txid"]
         tx["updated_at"] = timestamp()
@@ -175,6 +176,9 @@ def create_swap(data: SwapSchema):
     amount = data.amount
     
     if (address) and (amount) and (feerate):
+        if (amount <= 0):
+            raise HTTPException(400, "Amount must not be less than or equal to zero.")
+        
         if (amount < SWAP_MIN_AMOUNT):
             raise HTTPException(400, "Amount is less than the minimum.")
         
