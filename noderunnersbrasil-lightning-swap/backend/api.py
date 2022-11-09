@@ -5,13 +5,12 @@ from services.redis import redis
 from database import database
 
 from fastapi import FastAPI, HTTPException, Body
-from configs import INVOICE_EXPIRE, LNBITS_HOST, LNBITS_SPLIT_WALLET_ADMIN_KEY, LNBITS_SPLIT_WALLET_INVOICE_KEY
+from configs import INVOICE_EXPIRE, MIRRORS_CLEAR_URL, MIRRORS_TOR_URL
 from configs import PATH, SWAP_MAX_AMOUNT, SWAP_MIN_AMOUNT, SWAP_SERVICE_FEERATE
 from configs import API_HOST, API_PORT
 from helpers import percentage, timestamp
 
 from schemas import ReedemSchema, SwapSchema
-from lnbits import Lnbits
 from tinydb import Query
 
 from json import dumps, loads
@@ -52,6 +51,10 @@ async def get_info():
         "fees": {
             "network": fee_network,
             "service": SWAP_SERVICE_FEERATE
+        },
+        "mirrors": {
+            "clear": MIRRORS_CLEAR_URL,
+            "tor": MIRRORS_TOR_URL
         },
         "available": available
     }
@@ -95,19 +98,9 @@ def lnbits_webhook(data: dict = Body(...)):
         tx["expiry"] = None
         tx["to"]["txid"] = send_coins["txid"]
         tx["updated_at"] = timestamp()
-
-        logging.info(f"Saving the data to a persistent {PATH}/data/database.db.")
-        database.insert(tx)
         
-        # Distribute profits to stakeholders
-        # configured in Split Wallet.        
-        earned_fees = tx["fees"]["service"]
-        logging.info(f"Sending {earned_fees} fees sats to the stackholders.")
-
-        if (LNBITS_SPLIT_WALLET_ADMIN_KEY) and (LNBITS_SPLIT_WALLET_INVOICE_KEY):
-            lnbits_split_fees = Lnbits(admin_key=LNBITS_SPLIT_WALLET_ADMIN_KEY, invoice_key=LNBITS_SPLIT_WALLET_INVOICE_KEY, url=LNBITS_HOST)
-            lnbits_split_fees_invoice = lnbits_split_fees.create_invoice(earned_fees)["payment_request"]
-            lnbits.pay_invoice(lnbits_split_fees_invoice)
+        database.insert(tx)
+        logging.info(f"Saving the data to a persistent {PATH}/data/database.db.")
     else:
         logging.critical("Could not send transaction possible lack of liquidity.")
         
@@ -143,24 +136,15 @@ def reedem(data: ReedemSchema):
     database.update({"status": "transition"}, (Query().id == txid))
     send_coins = lnd.send_coins(address, amount, sat_per_vbyte=feerate, spend_unconfirmed=True)
     if (send_coins.get("txid")):
-        logging.info("Transaction sent to mempool %s." % (send_coins["txid"]))
+        database.update({"status": "settled"}, (Query().id == txid))
 
+        logging.info("Transaction sent to mempool %s." % (send_coins["txid"]))
+        
         tx["status"] = "settled"
         tx["to"]["txid"] = send_coins["txid"]
         tx["updated_at"] = timestamp()
         
         database.update(tx, (Query().id == txid))
-
-        # Distribute profits to stakeholders
-        # configured in Split Wallet.        
-        earned_fees = tx["fees"]["service"]
-        logging.info(f"Sending {earned_fees} fees sats to the stackholders.")
-
-        if (LNBITS_SPLIT_WALLET_ADMIN_KEY) and (LNBITS_SPLIT_WALLET_INVOICE_KEY):
-            lnbits_split_fees = Lnbits(admin_key=LNBITS_SPLIT_WALLET_ADMIN_KEY, invoice_key=LNBITS_SPLIT_WALLET_INVOICE_KEY, url=LNBITS_HOST)
-            lnbits_split_fees_invoice = lnbits_split_fees.create_invoice(earned_fees)["payment_request"]
-            lnbits.pay_invoice(lnbits_split_fees_invoice)
-        
         return {"txid": send_coins["txid"]}
     else:
         database.update({"status": "reedem"}, (Query().id == txid))
@@ -192,6 +176,9 @@ def create_swap(data: SwapSchema):
     amount = data.amount
     
     if (address) and (amount) and (feerate):
+        if (amount <= 0):
+            raise HTTPException(400, "Amount must not be less than or equal to zero.")
+        
         if (amount < SWAP_MIN_AMOUNT):
             raise HTTPException(400, "Amount is less than the minimum.")
         

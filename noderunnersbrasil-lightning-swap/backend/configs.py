@@ -9,6 +9,15 @@ makedirs(f"{PATH}/data", exist_ok=True)
 API_HOST = environ.get("API_HOST", "0.0.0.0")
 API_PORT = int(environ.get("API_PORT", 1536))
 
+# Mirrors configuration.
+MIRRORS_CLEAR_URL = environ.get("MIRRORS_CLEAR_URL", "").split(",")
+if (MIRRORS_CLEAR_URL) and not (MIRRORS_CLEAR_URL[0]):
+    MIRRORS_CLEAR_URL = []
+
+MIRRORS_TOR_URL = environ.get("MIRRORS_TOR_URL", "").split(",")
+if (MIRRORS_TOR_URL) and not (MIRRORS_TOR_URL[0]):
+    MIRRORS_TOR_URL = []
+
 # Lightning configuration.
 INVOICE_EXPIRE = int(environ.get("INVOICE_EXPIRE", (60 * 15)))
 
@@ -33,6 +42,3 @@ LNBITS_WEBHOOK_URL = environ.get("LNBITS_WEBHOOK_URL", f"http://127.0.0.1:{API_P
 
 LNBITS_MAIN_WALLET_ADMIN_KEY = environ["LNBITS_MAIN_WALLET_ADMIN_KEY"]
 LNBITS_MAIN_WALLET_INVOICE_KEY = environ["LNBITS_MAIN_WALLET_INVOICE_KEY"]
-
-LNBITS_SPLIT_WALLET_ADMIN_KEY = environ.get("LNBITS_SPLIT_WALLET_ADMIN_KEY")
-LNBITS_SPLIT_WALLET_INVOICE_KEY = environ.get("LNBITS_SPLIT_WALLET_INVOICE_KEY")

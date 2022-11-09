@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from "react-router-dom";
 import { percentage } from "../../helpers";
 import Vincent from "../../lib/vincent";
+import Onion from "../../assets/onion.png"
 import './index.css';
 
 var VITE_TITLE = "LN Swap"
@@ -30,6 +31,7 @@ function Swap() {
   const [ address, setAddress ] = useState("");
   const [ feerate, setFeerate ] = useState(1)
   const [ amount, setAmount ] = useState(0);
+  const [ torUrl, setTorUrl ] = useState("http://notyetset.onion");
   const [ total, setTotal ] = useState(0);
 
   const navigate = useNavigate();
@@ -55,17 +57,21 @@ function Swap() {
   useEffect(() => {
     vincent.get_info().then((r) => {
       const data = r.data;
-      
+      console.log(data)
       setMinAmount(data.swap.min_amount);
       setMaxAmount(data.swap.max_amount);
       setService(data.fees.service);
       if (data.available === true) {
         setLiquidity(true);
       }
+
+      if (data.mirrors.tor.length >= 1) {
+        setTorUrl(data.mirrors.tor.slice(-1).pop());
+      }
       setAvailable(data.available);
     })
   }, [])
-
+  
   useEffect(() => {
     if ((available === false)) {
       setLiquidity(false);
@@ -90,8 +96,27 @@ function Swap() {
   }, [address, feerate, amount])
 
   return (
-    <>
+    <div style={{width: "100%", height: "95%"}}>
+      
       <div className="container">
+        <a 
+          style={{
+            display: "flex", 
+            left: "80%", 
+            top: "5%", 
+            height: "10%",
+            width: "12%",
+            position: "absolute", 
+            flexDirection: "column",
+            justifyContent: "center",
+            alignItems: "center",
+            textDecoration: "inherit", 
+          }}
+          target="_blank"
+          href={torUrl}
+          >
+          <img className="icon-onion" src={Onion} />
+        </a>
         <div style={{ display: "flex", flexDirection: "row", alignItems: "center", justifyContent: "center"}}>
           <h1 className="title"> {VITE_TITLE} </h1>
         </div>
@@ -145,7 +170,7 @@ function Swap() {
             </p>
           ) : (
             <a 
-              style={{fontSize: 14, marginTop: "3%", marginBottom: "2%", textDecoration: "inherit", "color": "#474c51" }} 
+              style={{fontSize: 14, marginTop: "3%", marginBottom: "2%", textDecoration: "inherit", color: "#474c51" }} 
               href="/swap/try-to-send-bitcoin-again"
             > 
               Try to send bitcoin again!
@@ -153,7 +178,7 @@ function Swap() {
           )
         }
       </div>
-    </>
+    </div>
   )
 }
 

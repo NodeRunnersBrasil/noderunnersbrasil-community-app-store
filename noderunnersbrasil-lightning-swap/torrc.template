@@ -1,3 +1,3 @@
 HiddenServiceDir /data/app-$APP_ID
-HiddenServicePort 80 $APP_LN_SWAP_FRONTEND_IP:$APP_LN_SWAP_FRONTEND_PORT
-HiddenServicePort 1536 $APP_LN_SWAP_BACKEND_IP:$APP_LN_SWAP_BACKEND_PORT
+HiddenServicePort 80 frontend:$APP_LN_SWAP_FRONTEND_PORT
+HiddenServicePort 1536 backend:$APP_LN_SWAP_BACKEND_PORT

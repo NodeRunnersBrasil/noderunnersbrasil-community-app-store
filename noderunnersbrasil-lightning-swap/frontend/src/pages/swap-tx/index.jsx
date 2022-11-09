@@ -1,7 +1,7 @@
 import { QRCodeSVG } from "qrcode.react";
 import { useEffect, useState } from "react"
 import { useParams, useNavigate } from "react-router-dom"
-import { Timer } from "phosphor-react";
+import { Timer, Lightning } from "phosphor-react";
 import Vincent from "../../lib/vincent";
 import Lottie from "lottie-react";
 
@@ -24,13 +24,21 @@ if ((window.location.href.includes(".onion")) && (import.meta.env.VITE_VINCENT_B
 function SwapTx() {
     const { txid } = useParams();
     const [ tx, setTx ] = useState({});
+    const [ explorerUrl, setExplorerURL ] = useState("https://blockstream.info/tx/");
 
     const [ invoice, setInvoice ] = useState("");
     const [ counter, setCounter ] = useState(-1);
+    const [ amount, setAmount ] = useState(0);
     const [ status, setStatus ] = useState();
     
     const navigate = useNavigate()
     const vincent = new Vincent(VITE_VINCENT_BACKEND);
+
+    useEffect(() => {
+        if (window.location.href.includes(".onion")) {
+            setExplorerURL("http://explorerzydxu5ecjrkwceayqybizmpjjznk5izmitf2modhcusuqlid.onion/tx/")
+        }    
+    }, [])
     
     useEffect(() => {
         vincent.get_lookup(txid).then((r) => {
@@ -41,6 +49,7 @@ function SwapTx() {
             if ( counter === -1 ) { 
                 setCounter(Number(((data.created_at + data.expiry) - now).toFixed(0)));
             }
+            setAmount(data.from.amount)
             setInvoice(data.from.invoice);
             setStatus(data.status)
         }).catch((r) => {
@@ -67,8 +76,6 @@ function SwapTx() {
                 const data = r.data
                 setTx(data);
                 setStatus(data.status);
-            }).catch(() => {
-                setStatus("canceled")
             })
         }, 5000))
         return () => clearInterval(check_tx);
@@ -82,7 +89,7 @@ function SwapTx() {
         );
     }
     
-    if (( status === "reedem" )) {
+    if (status === "reedem") {
         return (
             <div className="container">
                 <Lottie loop={false} animationData={Alert} style={{ height: 350, width: 350 }} />
@@ -96,22 +103,7 @@ function SwapTx() {
             </div>
         )
     }
-
-    if ((status === "canceled"))  {
-        return (
-            <div className="container">
-                <Lottie loop={false} animationData={Canceled} style={{ height: 350, width: 350 }} />
-                <p> Your transaction has been cancelled. </p>
-                <button 
-                    className="button-go-back"
-                    onClick={() => navigate("/")}
-                >
-                    Go back
-                </button>
-            </div>
-        )
-    }
-
+    
     if (status === "settled") {
         return (
             <div className="container">
@@ -129,9 +121,9 @@ function SwapTx() {
                         color: "white"
                     }} 
                     target="_blank"
-                    href={`https://mempool.space/tx/${txid}`}
+                    href={`${explorerUrl}${txid}`}
                 > 
-                    <b>TX:</b> <i>{tx.to.txid}</i>
+                    <i>{tx.to.txid}</i>
                 </a>
                 <button 
                     class="button-go-back" 
@@ -144,10 +136,21 @@ function SwapTx() {
         )
     }
 
-    if ((counter < -1)) {
-        navigate("/")
+    if ((counter <= 0)) {
+        return (
+            <div className="container">
+                <Lottie loop={false} animationData={Canceled} style={{ height: 350, width: 350 }} />
+                <p> Your transaction has been cancelled. </p>
+                <button 
+                    className="button-go-back"
+                    onClick={() => navigate("/")}
+                >
+                    Go back
+                </button>
+            </div>
+        )
     }
-
+    
     return (
         <div className="container">
             <div 
@@ -168,7 +171,7 @@ function SwapTx() {
                 <Timer size={18} weight="duotone" style={{paddingLeft: "1.5%"}}/>
             </div>
 
-            <a href={`lightning:${invoice}`} style={{ width: "90%", marginLeft: "10%" }}>
+            <a href={`lightning:${invoice}`} style={{ width: "90%", marginLeft: "10%"}}>
                 <QRCodeSVG 
                     value={`lightning:${invoice}`} 
                     height={"90%"}
@@ -184,16 +187,22 @@ function SwapTx() {
                     display: "flex", 
                     flexDirection: "row", 
                     width: "100%", 
+                    alignItems: "baseline",
                     justifyContent: "center",
+                    fontSize: "13px"
                 }}
             >
                 <input value={invoice} disabled={true} style={{
-                    width: "50%", 
+                    width: "25%", 
                     background: "none",
                     border: "none",
                     outline: "none",
                     marginBottom: "15%",
                 }}/>
+                <div style={{ marginLeft: "2%", display: "flex", flexDirection: "row"}}>
+                    ~ {parseFloat(amount).toLocaleString('en-US', {style: 'decimal'})}
+                    <Lightning  size={19} color="yellow" weight="fill" />
+                </div>
             </div>
 
         </div>
