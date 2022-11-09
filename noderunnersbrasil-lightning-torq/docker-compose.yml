@@ -1,0 +1,45 @@
+version: "3.7"
+
+services:
+  app_proxy:
+    environment:
+      APP_HOST: $APP_TORQ_IP
+      APP_PORT: $APP_TORQ_PORT
+  torq:
+    image: "lncapital/torq:0.10.2"
+    user: "1000:1000"
+    restart: on-failure
+    stop_grace_period: 1m
+    volumes:
+      - ${APP_LIGHTNING_NODE_DATA_DIR}:/lnd:ro
+    depends_on:
+      - "torq_db"
+    command:
+      - --torq.port
+      - ${APP_TORQ_PORT}
+      - --db.host
+      - torq_db
+      - --db.password
+      - torq_db_password
+      - --torq.password
+      - ${APP_PASSWORD}
+      - --lnd.url
+      - ${APP_LIGHTNING_NODE_IP}:${APP_LIGHTNING_NODE_GRPC_PORT}
+      - --lnd.macaroon-path
+      - /lnd/data/chain/bitcoin/${APP_BITCOIN_NETWORK}/readonly.macaroon
+      - --lnd.tls-path
+      - /lnd/tls.cert
+      - start
+    networks:
+      default:
+        ipv4_address: $APP_TORQ_IP
+  torq_db:
+    image: "timescale/timescaledb:latest-pg14"
+    user: "1000:1000"
+    restart: on-failure
+    stop_grace_period: 1m
+    environment:
+      POSTGRES_PASSWORD: torq_db_password
+    volumes:
+      - ${APP_TORQ_DATA_DIR}:/var/lib/postgresql/data
+      - /etc/passwd:/etc/passwd:ro #enables postgres to init on user 1000
