@@ -1,7 +1,7 @@
 manifestVersion: 1
-id: lncapital-torq
+id: noderunnersbrasil-torq
 category: Lightning Node Management
-name: Torq
+name: Torq v0.10.2
 version: "v0.10.2"
 tagline: Torq is a capital management tool for routing nodes on the lightning network
 icon: https://raw.githubusercontent.com/lncapital/torq/main/docs/images/umbrel/torq-symbol-umbrel.svg
