@@ -41,11 +41,22 @@ if [  -z ${SWAP_MAX_AMOUNT+x} ]; then
     export SWAP_MAX_AMOUNT=100000000
 fi
 
+LNBITS_URL="http://${UMBREL_HOST}:3007"
+echo "Waiting for lnbits to be available ..."
+while ( true );
+do
+    (curl $LNBITS_URL &> /dev/null)
+    if [[ "$?" -eq 0 ]]; then
+        break
+    fi
+done
+echo "Lnbits is available."
+
 export LNBITS_HOST="http://host.docker.internal:3007/api"
 export LNBITS_WEBHOOK_URL="http://${APP_LN_SWAP_BACKEND_IP}:${APP_LN_SWAP_BACKEND_PORT}/api/v1/lnbits/webhook"
 
 if [ -z ${LNBITS_MAIN_WALLET_ADMIN_KEY+x} ]; then
-    LNBITS_WALLET_URL=$(curl -X GET --head --silent --write-out "%{redirect_url}\n" --output /dev/null http://${UMBREL_HOST}:3007/wallet?nme=default)
+    LNBITS_WALLET_URL=$(curl -X GET --head --silent --write-out "%{redirect_url}\n" --output /dev/null "${LNBITS_URL}/wallet?nme=default")
     LNBITS_WALLET_SOURCE=$(curl -L -s -w "\n%{http_code}" "${LNBITS_WALLET_URL}")
     LNBITS_WALLET_KEYS=$(echo $LNBITS_WALLET_SOURCE | python3 -c 'import sys, json, re; print(re.search(r"window\.wallet = ({.*});", sys.stdin.read()).group(1))')
 
