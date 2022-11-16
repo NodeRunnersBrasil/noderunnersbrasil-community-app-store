@@ -1,0 +1,7 @@
+#!/usr/bin/env bash
+
+"${UMBREL_ROOT}/scripts/app" start lightning
+"${UMBREL_ROOT}/scripts/app" start lnbits
+"${UMBREL_ROOT}/scripts/app" compose "${APP_ID}" up --detach tor
+
+export $(grep -v '^#' ${EXPORTS_APP_DIR}/.env | xargs) >> /dev/null 2>&1 

@@ -1,5 +1,6 @@
 #!/bin/bash
 
 if [ ! -d "dist" ]; then
-    npm run build
-fi
+    npm i
+    npm run build    
+fi 
