@@ -16,4 +16,4 @@ nano .env
 ```bash
 bash ./scripts/start.sh
 ```
-<b>Now access:</b> http://localhost:5173
+<b>Now access:</b> [umbrel.local](http://umbrel.local:4353)
